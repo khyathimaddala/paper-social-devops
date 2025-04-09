@@ -1,0 +1,5 @@
+- name: Restart Flask service
+  become: yes
+  ansible.builtin.systemd:
+    name: flask
+    state: restarted

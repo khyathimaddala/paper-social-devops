@@ -1,0 +1,36 @@
+
+- name: Install Python and pip
+  become: yes
+  ansible.builtin.apt:
+    name:
+      - python3
+      - python3-pip
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Install Flask dependencies
+  become: yes
+  ansible.builtin.pip:
+    name: flask
+    state: present
+
+- name: Copy Flask app files
+  ansible.builtin.copy:
+    src: "/mnt/e/Khyathi Maddala/paper-social/paper-social-devops/app/"
+    dest: /home/ec2-user/app/
+    mode: '0755'
+
+- name: Create systemd service file for Flask app
+  become: yes
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/files/flask.service"
+    dest: /etc/systemd/system/flask.service
+    mode: '0644'
+  notify: Restart Flask service
+
+- name: Ensure Flask service is enabled and started
+  become: yes
+  ansible.builtin.systemd:
+    name: flask
+    enabled: yes
+    state: started

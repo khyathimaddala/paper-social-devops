@@ -1,0 +1,5 @@
+- name: Deploy Flask app to EC2
+  hosts: web
+  become: yes
+  roles:
+    - web
