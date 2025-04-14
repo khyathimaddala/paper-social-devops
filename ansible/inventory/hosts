@@ -1,5 +1,6 @@
 [web]
 18.212.179.36
+54.167.152.195
 
 [web:vars]
 ansible_user=ec2-user
