@@ -21,10 +21,19 @@ jobs:
         run: |
           pip install flask
           pip install ansible
+          pip install -r app/requirements.txt
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/paper-social-key.pem
+          chmod 600 ~/.ssh/paper-social-key.pem
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/paper-social-key.pem
 
       - name: Deploy with Ansible
         run: |
-          ansible-playbook -i ansible/inventory/hosts ansible/playbooks/deploy.yml
+          ansible-playbook -i ansible/inventory/hosts ansible/playbooks/deploy.yml --private-key=~/.ssh/paper-social-key.pem
         env:
           ANSIBLE_HOST_KEY_CHECKING: false
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
