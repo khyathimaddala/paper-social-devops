@@ -14,6 +14,6 @@
         iam_type: role
         iam_name: PaperSocialCloudWatchRole
         policy_name: CloudWatchAgentPolicy
-        policy_document: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"logs:CreateLogStream\",\"logs:PutLogEvents\"],\"Resource\":\"arn:aws:logs:*:*:log-group:/aws/*\"}]}"
+        policy_json: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"logs:CreateLogStream\",\"logs:PutLogEvents\"],\"Resource\":\"arn:aws:logs:*:*:log-group:/aws/*\"}]}"
         state: present
       register: iam_policy_result
