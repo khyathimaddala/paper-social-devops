@@ -3,3 +3,9 @@
   ansible.builtin.systemd:
     name: flask
     state: restarted
+
+- name: Restart CloudWatch Agent
+  become: yes
+  ansible.builtin.service:
+    name: amazon-cloudwatch-agent
+    state: restarted
