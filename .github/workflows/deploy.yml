@@ -29,8 +29,10 @@ jobs:
         run: ansible-galaxy collection install -r ansible/requirements.yml
 
 
-      - name: Debug Ansible collections
-        run: ansible-galaxy collection list | grep community.aws
+      - name: Debug Ansible collections and version
+        run: |
+          ansible-galaxy collection list | grep community.aws
+          ansible --version
 
       - name: Set up SSH key
         run: |
