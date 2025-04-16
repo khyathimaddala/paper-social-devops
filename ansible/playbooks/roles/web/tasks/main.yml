@@ -34,3 +34,31 @@
     name: flask
     enabled: yes
     state: started
+
+- name: Install CloudWatch Agent
+  become: yes
+  ansible.builtin.yum:
+    name: amazon-cloudwatch-agent
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Start CloudWatch Agent
+  become: yes
+  ansible.builtin.service:
+    name: amazon-cloudwatch-agent
+    state: started
+    enabled: yes
+
+- name: Copy CloudWatch config
+  become: yes
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/files/cloudwatch-config.json"
+    dest: /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+    mode: '0644'
+  notify: Restart CloudWatch Agent
+
+- name: Ensure CloudWatch Agent is running
+  become: yes
+  ansible.builtin.service:
+    name: amazon-cloudwatch-agent
+    state: restarted
