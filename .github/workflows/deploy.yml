@@ -31,6 +31,9 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/paper-social-key.pem
 
+      - name: Debug SSH key
+        run: ls -l ~/.ssh/paper-social-key.pem
+
       - name: Deploy with Ansible
         run: |
           ansible-playbook -i ansible/inventory/hosts ansible/playbooks/deploy.yml --private-key=~/.ssh/paper-social-key.pem
