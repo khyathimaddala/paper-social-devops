@@ -38,11 +38,9 @@
 - name: Install CloudWatch Agent
   become: yes
   ansible.builtin.command: yum install -y amazon-cloudwatch-agent
-  args:
-    warn: no
-  when: ansible_os_family == "RedHat"
   register: install_result
-  changed_when: "'is already installed' not in install_result.stdout"
+  changed_when: install_result.rc == 0 and 'is already installed' not in install_result.stdout_lines | join('')
+  when: ansible_os_family == "RedHat"
 
 - name: Start CloudWatch Agent
   become: yes
