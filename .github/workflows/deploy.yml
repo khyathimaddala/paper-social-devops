@@ -17,10 +17,12 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install dependencies
+      - name: Install Ansible and AWS dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install flask
-          pip install ansible
+          pip install ansible boto3 awscli
+          ansible-galaxy collection install community.aws
           pip install -r app/requirements.txt
 
       - name: Set up SSH key
@@ -33,14 +35,29 @@ jobs:
 
       - name: Debug SSH key
         run: ls -l ~/.ssh/paper-social-key.pem
+      
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+     
+      - name: Create IAM role and policy
+        run: |
+          ansible-playbook -i ansible/inventory/hosts ansible/playbooks/roles/web/tasks/iam_setup.yml
+
+
 
       - name: Deploy with Ansible
         run: |
           ansible-playbook -i ansible/inventory/hosts ansible/playbooks/deploy.yml --private-key=~/.ssh/paper-social-key.pem --ssh-common-args='-o IdentitiesOnly=yes' -v
         env:
           ANSIBLE_HOST_KEY_CHECKING: false
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Verify deployment
         run: curl http://paper-social-alb-1896686171.us-east-1.elb.amazonaws.com
+
+      - name: Check CloudWatch Agent status 
+        run: |
+          ssh -i ~/.ssh/paper-social-key.pem ec2-user@18.212.179.36 "sudo systemctl status amazon-cloudwatch-agent" || echo "SSH or status check failed, check manually"
+          ssh -i ~/.ssh/paper-social-key.pem ec2-user@54.167.152.195 "sudo systemctl status amazon-cloudwatch-agent" || echo "SSH or status check failed, check manually"

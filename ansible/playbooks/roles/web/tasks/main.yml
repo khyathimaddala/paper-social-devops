@@ -62,3 +62,14 @@
   ansible.builtin.service:
     name: amazon-cloudwatch-agent
     state: restarted
+
+- name: Associate IAM role with EC2 instances
+  community.aws.ec2_instance:
+    instance_ids:
+      - "i-0ad33ab26a39fad69"  # actual ID for 18.212.179.36
+      - "i-0b37cd6c707ee2714"  # actual ID for 54.167.152.195
+    iam_instance_profile: "PaperSocialCloudWatchRole"
+    region: "us-east-1"  
+  register: iam_attach_result
+  ignore_errors: yes
+  when: ansible_os_family == "RedHat"
