@@ -2,12 +2,18 @@
   hosts: localhost
   gather_facts: no
   tasks:
-    - name: Create IAM role for CloudWatch Agent with policy
+    - name: Create IAM role for CloudWatch Agent
       community.aws.iam_role:
         name: PaperSocialCloudWatchRole
         assume_role_policy_document: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ec2.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}"
-        policies:
-          - policy_name: CloudWatchAgentPolicy
-            policy_document: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"logs:CreateLogStream\",\"logs:PutLogEvents\"],\"Resource\":\"arn:aws:logs:*:*:log-group:/aws/*\"}]}"
         state: present
       register: iam_role_result
+
+    - name: Attach CloudWatch Agent policy to IAM role
+      community.aws.iam_policy:
+        iam_type: role
+        iam_name: PaperSocialCloudWatchRole
+        policy_name: CloudWatchAgentPolicy
+        policy_document: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"logs:CreateLogStream\",\"logs:PutLogEvents\"],\"Resource\":\"arn:aws:logs:*:*:log-group:/aws/*\"}]}"
+        state: present
+      register: iam_policy_result
