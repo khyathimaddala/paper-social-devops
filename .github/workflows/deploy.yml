@@ -29,6 +29,7 @@ jobs:
         run: |
           ansible-galaxy collection list | grep community.aws
           ansible --version
+          ansible-doc -l | grep community.aws
           echo "Module search paths: $(ansible-config dump | grep DEFAULT_MODULE_PATH)"
 
       - name: Debug role path and templates
