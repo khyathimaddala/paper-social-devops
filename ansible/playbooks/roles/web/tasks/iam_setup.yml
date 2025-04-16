@@ -1,14 +1,18 @@
-- name: Create IAM role for CloudWatch Agent
-  community.aws.iam_role:
-    name: PaperSocialCloudWatchRole
-    assume_role_policy_document: "{{ lookup('template', 'iam_assume_role.json.j2') | from_json }}"
-    state: present
-  register: iam_role_result
+- name: Manage IAM role for CloudWatch Agent
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Create IAM role for CloudWatch Agent
+      community.aws.iam_role:
+        name: PaperSocialCloudWatchRole
+        assume_role_policy_document: "{{ lookup('template', 'iam_assume_role.json.j2') | from_json }}"
+        state: present
+      register: iam_role_result
 
-- name: Attach CloudWatch Agent policy to IAM role
-  community.aws.iam_role_policy:
-    role_name: PaperSocialCloudWatchRole
-    policy_name: CloudWatchAgentPolicy
-    policy_document: "{{ lookup('template', 'cloudwatch_policy.json.j2') | from_json }}"
-    state: present
-  register: iam_policy_result
+    - name: Attach CloudWatch Agent policy to IAM role
+      community.aws.iam_role_policy:
+        role_name: PaperSocialCloudWatchRole
+        policy_name: CloudWatchAgentPolicy
+        policy_document: "{{ lookup('template', 'cloudwatch_policy.json.j2') | from_json }}"
+        state: present
+      register: iam_policy_result

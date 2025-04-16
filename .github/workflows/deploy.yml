@@ -24,6 +24,10 @@ jobs:
           pip install ansible boto3 awscli
           ansible-galaxy collection install community.aws
           pip install -r app/requirements.txt
+    
+      - name: Install Ansible collections from requirements
+        run: ansible-galaxy collection install -r ansible/requirements.yml
+
 
       - name: Debug Ansible collections
         run: ansible-galaxy collection list | grep community.aws
