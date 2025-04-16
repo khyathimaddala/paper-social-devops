@@ -65,6 +65,9 @@ jobs:
           ansible-playbook -i ansible/inventory/hosts ansible/playbooks/deploy.yml --private-key=~/.ssh/paper-social-key.pem --ssh-common-args='-o IdentitiesOnly=yes' -v
         env:
           ANSIBLE_HOST_KEY_CHECKING: false
+    
+      - name: Verify Application Health
+        run: curl -f http://paper-social-alb-1896686171.us-east-1.elb.amazonaws.com/health || { echo "Health check failed"; exit 1; }
 
       - name: Verify deployment
         run: curl http://paper-social-alb-1896686171.us-east-1.elb.amazonaws.com || echo "ALB check failed, verify manually"
