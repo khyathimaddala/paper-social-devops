@@ -22,22 +22,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install flask
           pip install ansible boto3 awscli
-          ansible-galaxy collection install community.aws
+          ansible-galaxy collection install community.aws:==9.1.0 --force
           pip install -r app/requirements.txt
-    
-      - name: Install Ansible collections from requirements
-        run: ansible-galaxy collection install -r ansible/requirements.yml
-
 
       - name: Debug Ansible collections and version
         run: |
           ansible-galaxy collection list | grep community.aws
           ansible --version
+          echo "Module search paths: $(ansible-config dump | grep DEFAULT_MODULE_PATH)"
 
       - name: Debug role path and templates
         run: |
-          echo "Role path: $(ansible-playbook -i ansible/inventory/hosts ansible/playbooks/roles/web/tasks/iam_setup.yml --list-tasks | grep role_path)"
+          ansible-playbook -i ansible/inventory/hosts ansible/playbooks/roles/web/tasks/iam_setup.yml --list-tasks || echo "Task list failed"
           ansible-playbook -i ansible/inventory/hosts ansible/playbooks/roles/web/tasks/iam_setup.yml --check || echo "Template check failed"
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/paper-social-key.pem
+          chmod 600 ~/.ssh/paper-social-key.pem
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/paper-social-key.pem
 
       - name: Debug SSH key
         run: ls -l ~/.ssh/paper-social-key.pem
