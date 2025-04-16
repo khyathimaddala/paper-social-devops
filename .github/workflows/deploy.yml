@@ -34,13 +34,10 @@ jobs:
           ansible-galaxy collection list | grep community.aws
           ansible --version
 
-      - name: Set up SSH key
+      - name: Debug role path and templates
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/paper-social-key.pem
-          chmod 600 ~/.ssh/paper-social-key.pem
-          eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/paper-social-key.pem
+          echo "Role path: $(ansible-playbook -i ansible/inventory/hosts ansible/playbooks/roles/web/tasks/iam_setup.yml --list-tasks | grep role_path)"
+          ansible-playbook -i ansible/inventory/hosts ansible/playbooks/roles/web/tasks/iam_setup.yml --check || echo "Template check failed"
 
       - name: Debug SSH key
         run: ls -l ~/.ssh/paper-social-key.pem
