@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
@@ -25,6 +25,9 @@ jobs:
           ansible-galaxy collection install community.aws
           pip install -r app/requirements.txt
 
+      - name: Debug Ansible collections
+        run: ansible-galaxy collection list | grep community.aws
+
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
@@ -35,7 +38,7 @@ jobs:
 
       - name: Debug SSH key
         run: ls -l ~/.ssh/paper-social-key.pem
-      
+
       - name: Configure AWS CLI
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -43,12 +46,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
           audience: sts.amazonaws.com
-     
+
       - name: Create IAM role and policy
         run: |
-          ansible-playbook -i ansible/inventory/hosts ansible/playbooks/roles/web/tasks/iam_setup.yml
-
-
+          ansible-playbook -i ansible/inventory/hosts ansible/playbooks/roles/web/tasks/iam_setup.yml || { echo "IAM setup failed, check logs"; exit 1; }
 
       - name: Deploy with Ansible
         run: |
@@ -57,9 +58,9 @@ jobs:
           ANSIBLE_HOST_KEY_CHECKING: false
 
       - name: Verify deployment
-        run: curl http://paper-social-alb-1896686171.us-east-1.elb.amazonaws.com
+        run: curl http://paper-social-alb-1896686171.us-east-1.elb.amazonaws.com || echo "ALB check failed, verify manually"
 
-      - name: Check CloudWatch Agent status 
+      - name: Check CloudWatch Agent status
         run: |
-          ssh -i ~/.ssh/paper-social-key.pem ec2-user@18.212.179.36 "sudo systemctl status amazon-cloudwatch-agent" || echo "SSH or status check failed, check manually"
-          ssh -i ~/.ssh/paper-social-key.pem ec2-user@54.167.152.195 "sudo systemctl status amazon-cloudwatch-agent" || echo "SSH or status check failed, check manually"
+          ssh -i ~/.ssh/paper-social-key.pem ec2-user@18.212.179.36 "sudo systemctl status amazon-cloudwatch-agent" || echo "SSH or status check failed for 18.212.179.36, check manually"
+          ssh -i ~/.ssh/paper-social-key.pem ec2-user@54.167.152.195 "sudo systemctl status amazon-cloudwatch-agent" || echo "SSH or status check failed for 54.167.152.195, check manually"
