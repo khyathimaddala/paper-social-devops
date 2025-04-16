@@ -40,6 +40,7 @@
   ansible.builtin.yum:
     name: amazon-cloudwatch-agent
     state: present
+    use_backend: dnf
   when: ansible_os_family == "RedHat"
 
 - name: Start CloudWatch Agent
